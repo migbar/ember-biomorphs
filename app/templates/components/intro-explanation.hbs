@@ -1,0 +1,61 @@
+<p>
+  Inspired by <a href="https://richarddawkins.net/">Prof. Richard Dawkins</a>' wonderful book: <a href="http://www.amazon.com/Blind-Watchmaker-Evidence-Evolution-Universe/dp/0393351491/ref=tmm_pap_swatch_0?_encoding=UTF8&qid=1457125394&sr=8-1">The Blind Watchmaker: Why the Evidence of Evolution Reveals a Universe without Design</a>.
+  <br>
+  In which he presents an explanation of, and argument for, the theory of evolution by means of natural selection.
+  {{!-- <button {{action='showAll'}} class='btn btn-default'>Show More >></button> --}}
+  <button {{action 'toggleShow'}} class='btn btn-sm btn-default'>
+    {{#if showAll}}
+      Hide
+    {{else}}
+      Read More ...
+    {{/if}}
+  </button>
+</p>
+{{#liquid-spacer tagName="li"}}
+  {{#if showAll}}
+    <p>
+      <p>
+        From <a href="https://en.wikipedia.org/wiki/The_Blind_Watchmaker">Wikipedia's The Blind Watchmaker Article</a> :
+      </p>
+      <p>
+      In developing his argument that natural selection can explain the complex adaptations of organisms,
+      Dawkins' first concern is to illustrate the difference between the potential for the development of complexity
+      as a result of pure randomness, as opposed to that of randomness coupled with cumulative selection.
+      </p>
+      <p>
+      He demonstrates this by the example of the weasel program. Dawkins then describes his experiences with a more sophisticated computer model
+      of artificial selection implemented in a program also called The Blind Watchmaker, which was sold separately as a teaching aid
+      (open source implementations are currently available,[2] as are more advanced versions of the idea[3]).
+      </p>
+      <p>
+      The program displayed a two dimensional shape (a “biomorph”) made up of straight black lines, the length, position, and angle of which were defined by a simple set of rules and instructions
+       (analogous to a genome). Adding new lines (or removing them) based on these rules offered a discrete set of possible new shapes (mutations),
+       which were displayed on screen so that the user could choose between them.
+       </p>
+       <p>
+       The chosen mutation would then be the basis for another generation of biomorph mutants
+        to be chosen from, and so on. Thus, the user, by selection, could steer the evolution of biomorphs.
+        This process often produced images which were reminiscent of real organisms for instance beetles, bats, or trees.
+      </p>
+
+      Biomorphs (or BiomorphBounce) are lifelike forms that have the shape, determined by they "genome" that can be as simple as a vector of integers.
+
+      Evolution of the biomorph that has the "genome" of eight integer "genes".
+      Eight of the genes can take on eleven different states, and another can take on five different states, resulting a total of 1,071,794,405 different biomorphs.
+
+      The shape of the biomorph is determined by converting the "genome code" into drawing, following some agreed rules.
+      The numeric value of each integer ("gene") changes in time between some minimum and maximum[1].
+      Each gene has its own speed of change (the mutation rate) that is randomly set at the program start.
+
+      The genes can control:
+      <ol>
+        <li>the overall shape of the biomorph,</li>
+        <li>the depth of recursion,</li>
+        <li>the colour of the biomorph,</li>
+        <li>the number of segmentations,</li>
+        <li>the size of the separation of the segments,</li>
+        <li>the shape used to draw the biomorph (oval, rectangle, line, etc).</li>
+      </ol>
+    </p>
+  {{/if}}
+{{/liquid-spacer}}
