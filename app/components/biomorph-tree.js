@@ -3,6 +3,7 @@ import d3 from 'd3';
 import hbs from 'htmlbars-inline-precompile';
 import GraphicSupport from 'ember-cli-d3/mixins/d3-support';
 import MarginConvention from 'ember-cli-d3/mixins/margin-convention';
+import { task, timeout } from 'ember-concurrency';
 
 const { computed, get } = Ember;
 
@@ -15,6 +16,9 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
   height: 0, //injected
   scale: 0.8,
   mutationRate: 4,
+
+  evolutionRate: 30,
+  mutationCounter: 0,
 
   xOffset: computed('width', function() {
     return this.get('width') / 2
@@ -164,6 +168,8 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
 
       var lines = {};
 
+      let t = this.get('evolutionRate') * 0.4;
+
       for (var id in biomorphStart) {
           var line = biomorphStart[id];
           var x1 = line["x1"] + this.get('xOffset');
@@ -182,8 +188,8 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
                                       .attr("y1", y1)
                                       .attr("x2", x1)
                                       .attr("y2", y1)
-                                      .delay(600)
-                                      .duration(400);
+                                      .delay(t)
+                                      .duration(t);
           }
       };
 
@@ -198,8 +204,8 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
                                       .attr("y1", y1)
                                       .attr("x2", x2)
                                       .attr("y2", y2)
-                                      .delay(1000)
-                                      .duration(1000);
+                                      .delay(t)
+                                      .duration(t);
           } else {
               // new branch
               container.append("line").attr("x1", x1)
@@ -213,20 +219,31 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
                                       .attr("y2", y2)
                                       .attr("stroke-width", 2)
                                       .attr("stroke", "black")
-                                      .delay(2000)
-                                      .duration(400);
+                                      .delay(t)
+                                      .duration(t);
           }
       };
   },
 
-  startEvolution(genome) {
-    this.set('currentGenome', genome.slice(0))
+  evolution: task(function * () {
+    this.set('mutationCounter', 0);
+    this.initGenome();
     this.drawTree();
-    const that = this;
-    let evolutionId = setInterval(function() {
-        that.evolve();
-    }, 2000);
-  },
+
+    while (true) {
+      try {
+        this.incrementProperty('mutationCounter');
+        d3.selectAll('line').remove();
+        this.evolve();
+        yield timeout(this.get('evolutionRate'));
+      } finally {
+        console.log('mutation', this.get('mutationCounter'));
+        console.log(this.get('currentGenome'));
+        // console.log('in startEvolution finally', this.get('currentGenome'));
+      }
+    }
+
+  }),
 
   call(selection) {
     this.initGenome();
@@ -236,6 +253,8 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
 
   actions: {
     start() {
+      this.set('currentGenome', genome.slice(0))
+      this.drawTree();
       this.startEvolution(this.get('currentGenome'));
     }
   }

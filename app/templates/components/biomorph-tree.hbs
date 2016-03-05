@@ -2,5 +2,33 @@
 {{yield}}
 
 <div class="actions">
-  <button {{action 'start'}} type="button" class="btn btn-default">Start</button>
+  {{!-- <button {{perform 'evolution'}} type="button" class="btn btn-default">Start</button> --}}
+
+  {{!-- <button onclick={{perform evolution}}>
+    Start Evolution
+  </button> --}}
+
+
+
+  <button onclick={{perform evolution}}
+          class={{if evolution.isIdle 'btn btn-success'}}>
+    Start Evolution
+  </button>
+  <button onclick={{cancel-all evolution}}
+          class={{if evolution.isRunning 'btn btn-success'}}>
+    Stop Evolution
+  </button>
+
+  <h2>
+    {{#if evolution.isRunning }}
+    Evolution number {{mutationCounter}} {{fa-icon "spinner" spin=true}}
+    {{else}}
+    Current Genome
+    {{/if}}
+  </h2>
+
+  <p>
+    {{currentGenome}}
+  </p>
+
 </div>
