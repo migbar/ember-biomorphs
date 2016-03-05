@@ -10,12 +10,13 @@
 
   {{#data-visual as |ctx width height|}}
 
-    {{#biomorph-tree select=ctx.svg.select.tree width=width height=height as | currentGenome | }}
+    {{biomorph-tree select=ctx.svg.select.tree width=width height=height genome=currentGenome}}
+    {{!-- {{#biomorph-tree select=ctx.svg.select.tree width=width height=height genome=currentGenome as | currentGenome | }} --}}
 
 
       {{!-- genome here:  {{currentGenome}} --}}
 
-    {{/biomorph-tree}}
+    {{!-- {{/biomorph-tree}} --}}
 
   {{/data-visual}}
 

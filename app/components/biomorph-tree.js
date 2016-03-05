@@ -9,11 +9,12 @@ const { computed, get } = Ember;
 export default Ember.Component.extend(GraphicSupport, MarginConvention, {
   layout: hbs`{{yield currentGenome}}`,
   currentGenome: [], //should be set during initializatiokn
-  startingGenome: [20, 20, 20, -20, Math.sin(Math.PI / 4.0) * -20, 0, Math.sin(Math.PI / 4.0) * 20, 20, 5],  
+  startingGenome: [20, 20, 20, -20, Math.sin(Math.PI / 4.0) * -20, 0, Math.sin(Math.PI / 4.0) * 20, 20, 5],
 
   width: 0, //injected
   height: 0, //injected
   scale: 0.8,
+  mutationRate: 4,
 
   xOffset: computed('width', function() {
     return this.get('width') / 2
@@ -23,9 +24,9 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
     return this.get('height') / 2
   }),
 
-  drawTree(selection) {
+  drawTree() {
     let biomorph = this.generateBiomorph(this.get('currentGenome'));
-    this.drawLines(selection, this.get('xOffset'), this.get('yOffset'), biomorph);
+    this.drawLines(this.get('selection'), this.get('xOffset'), this.get('yOffset'), biomorph);
   },
 
   generateLines(id, x1, y1, length, dir, dx, dy, lines) {
@@ -99,6 +100,45 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
       return lines;
   },
 
+  mutate(genome) {
+    var clone = genome.slice(0);
+    var gene = this.randomGene();
+    if (gene == 8) {
+        clone[gene] += this.randomBranchingMutation();
+    } else {
+        clone[gene] += this.randomMutation();
+    }
+    return clone;
+  },
+
+  randomGene() {
+    return Math.round(8 * Math.random());
+  },
+
+  randomGenes() {
+    var genes = [];
+    for (var i = 0; i < 3; i++) {
+        var gene = this.randomGene();
+        while (genes.indexOf(gene) != -1) {
+            gene = this.randomGene();
+        }
+        genes.push(gene);
+    };
+    return genes;
+  },
+
+  randomSign() {
+    return (Math.random() > 0.5) ? -1 : 1;
+  },
+
+  randomBranchingMutation() {
+    return this.randomSign();
+  },
+
+  randomMutation() {
+    return (this.get('mutationRate') + Math.random()) * this.randomSign();
+  },
+
   scaleDecodedGenome(dx, dy) {
       for (var i = 0; i < dx.length; i++) {
           dx[i] *= this.get('scale');
@@ -110,9 +150,94 @@ export default Ember.Component.extend(GraphicSupport, MarginConvention, {
     this.set('currentGenome', this.get('startingGenome'));
   },
 
+  evolve() {
+    let offspring = this.mutate(this.get('currentGenome'));
+    this.transition(this.get('currentGenome'), offspring);
+    this.set('currentGenome', offspring);
+  },
+
+  transition(genomeStart, genomeEnd) {
+      // var container     = initContainer(),
+      var container     = this.get('selection'),
+          biomorphStart = this.generateBiomorph(genomeStart),
+          biomorphEnd   = this.generateBiomorph(genomeEnd);
+
+      var lines = {};
+
+      for (var id in biomorphStart) {
+          var line = biomorphStart[id];
+          var x1 = line["x1"] + this.get('xOffset');
+          var y1 = line["y1"] + this.get('yOffset');
+          var x2 = line["x2"] + this.get('xOffset');
+          var y2 = line["y2"] + this.get('yOffset');
+          lines[id] = container.append("line").attr("x1", x1)
+                                              .attr("y1", y1)
+                                              .attr("x2", x2)
+                                              .attr("y2", y2)
+                                              .attr("stroke-width", 2)
+                                              .attr("stroke", "black");
+          if (!biomorphEnd.hasOwnProperty(id)) {
+              // branch should die
+              lines[id].transition().attr("x1", x1)
+                                      .attr("y1", y1)
+                                      .attr("x2", x1)
+                                      .attr("y2", y1)
+                                      .delay(600)
+                                      .duration(400);
+          }
+      };
+
+      for (var id in biomorphEnd) {
+          var newLine = biomorphEnd[id];
+          var x1 = newLine["x1"] + this.get('xOffset');
+          var y1 = newLine["y1"] + this.get('yOffset');
+          var x2 = newLine["x2"] + this.get('xOffset');
+          var y2 = newLine["y2"] + this.get('yOffset');
+          if (lines.hasOwnProperty(id)) {
+              lines[id].transition().attr("x1", x1)
+                                      .attr("y1", y1)
+                                      .attr("x2", x2)
+                                      .attr("y2", y2)
+                                      .delay(1000)
+                                      .duration(1000);
+          } else {
+              // new branch
+              container.append("line").attr("x1", x1)
+                                      .attr("y1", y1)
+                                      .attr("x2", x1)
+                                      .attr("y2", y1)
+                                      .transition()
+                                      .attr("x1", x1)
+                                      .attr("y1", y1)
+                                      .attr("x2", x2)
+                                      .attr("y2", y2)
+                                      .attr("stroke-width", 2)
+                                      .attr("stroke", "black")
+                                      .delay(2000)
+                                      .duration(400);
+          }
+      };
+  },
+
+  startEvolution(genome) {
+    this.set('currentGenome', genome.slice(0))
+    this.drawTree();
+    const that = this;
+    let evolutionId = setInterval(function() {
+        that.evolve();
+    }, 2000);
+  },
+
   call(selection) {
-    this.initGenome()
-    this.drawTree(selection);
+    this.initGenome();
+    this.set('selection', selection);
+    this.drawTree();
+  },
+
+  actions: {
+    start() {
+      this.startEvolution(this.get('currentGenome'));
+    }
   }
 
 });
