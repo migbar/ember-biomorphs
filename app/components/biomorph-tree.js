@@ -9,7 +9,7 @@ const { computed, get } = Ember;
 export default Ember.Component.extend(GraphicSupport, MarginConvention, {
   layout: hbs`{{yield currentGenome}}`,
   currentGenome: [], //should be set during initializatiokn
-  startingGenome: [20, 20, 20, -20, Math.sin(Math.PI / 4.0) * -20, 0, Math.sin(Math.PI / 4.0) * 20, 20, 5],
+  startingGenome: [20, 20, 20, -20, Math.sin(Math.PI / 4.0) * -20, 0, Math.sin(Math.PI / 4.0) * 20, 20, 5],  
 
   width: 0, //injected
   height: 0, //injected
